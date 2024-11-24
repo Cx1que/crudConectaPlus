@@ -24,7 +24,7 @@ const getDadosForm = function () {
         contatoJSON.image = imagemContato.value;
     }
 
-    return contatoJSON;
+    return status, contatoJSON; 
 };
 
 const postContato = async function (dadosContato) {
@@ -39,6 +39,7 @@ const postContato = async function (dadosContato) {
 
     if (response.status === 201) {
         alert('Contato inserido com sucesso.');
+        limparFormulario();
         getContatos();
     } else {
         alert('Não foi possível inserir o contato. Verifique os dados enviados.');
@@ -56,10 +57,9 @@ const putContato = async function (dadosContato) {
         body: JSON.stringify(dadosContato),
     });
 
-    
-
     if (response.status === 200) {
         alert('Contato atualizado com sucesso.');
+        limparFormulario();
         getContatos();
     } else {
         alert('Não foi possível atualizar o contato. Verifique os dados enviados.');
@@ -147,27 +147,54 @@ const setCardItens = function (contatos) {
             console.log('ID do contato para editar:', id);
             getBuscarContato(id);
         });
+
+        
         
     });
 };
 
 const getBuscarContato = async function (id) {
     let url = `https://app-avaliacao-brh0avd2ahegehac.brazilsouth-01.azurewebsites.net/projeto2/fecaf/buscar/contato/${id}`;
-    let response = await fetch(url);
-    let dados = await response.json();
+    
+    try {
+        let response = await fetch(url);
 
-    if (response.status === 200) {
-        document.getElementById('nome').value = dados.nome;
-        document.getElementById('telefone').value = dados.telefone;
-        document.getElementById('imagem').value = dados.image;
-        document.getElementById('email').value = dados.email;
+        if (!response.ok) {
+            console.error(`Erro ao buscar contato: ${response.status} - ${response.statusText}`);
+            return;
+        }
 
-        document.getElementById('salvar').innerText = 'Atualizar';
-        sessionStorage.setItem('idContato', id);
+        let dados = await response.json();
+        console.log('Resposta completa da API:', dados);
 
-        console.log('Resposta da API:', dados);
+        if (dados.contato && dados.contato.length > 0) {
+            let contato = dados.contato[0];
+            
+            document.getElementById('nome').value = contato.nome || '';
+            document.getElementById('telefone').value = contato.telefone || '';
+            document.getElementById('imagem').value = contato.image || '';
+            document.getElementById('email').value = contato.email || '';
+
+            document.getElementById('salvar').innerText = 'Atualizar';
+            sessionStorage.setItem('idContato', id);
+        } else {
+            console.error('Contato não encontrado na resposta da API.');
+        }
+    } catch (error) {
+        console.error('Erro ao buscar contato:', error);
     }
 };
+
+const limparFormulario = function () {
+    document.getElementById('nome').value = '';
+    document.getElementById('telefone').value = '';
+    document.getElementById('email').value = '';
+    document.getElementById('imagem').value = '';
+
+    document.getElementById('salvar').innerText = 'Salvar';
+};
+
+
 
 
 botaoSalvar.addEventListener('click', function () {
