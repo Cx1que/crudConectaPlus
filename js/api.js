@@ -1,22 +1,33 @@
 const botaoSalvar = document.getElementById('salvar');
 
+
 const getDadosForm = function () {
     let contatoJSON = {};
     let status = true;
-
+    
     let nomeContato = document.getElementById('nome');
     let telefoneContato = document.getElementById('telefone');
     let emailContato = document.getElementById('email');
     let imagemContato = document.getElementById('imagem');
-
-    if (
-        nomeContato.value === '' ||
-        telefoneContato.value === '' ||
-        emailContato.value === '' ||
+    
+    const nomeValido = /^[a-zA-ZÀ-ÿ\s]+$/;
+    
+    const telefoneValido = /^[0-9]+$/;
+    
+    if (nomeContato.value === '' || 
+        telefoneContato.value === '' || 
+        emailContato.value === '' || 
         imagemContato.value === ''
     ) {
         alert('Todos os campos devem ser preenchidos.');
         status = false;
+    } else if (!nomeValido.test(nomeContato.value)) {
+        alert('O campo de nome deve conter apenas letras.');
+        status = false;
+    } else if (!telefoneValido.test(telefoneContato.value)) {
+        alert('O campo de telefone deve conter apenas números.');
+        status = false;
+    
     } else {
         contatoJSON.nome = nomeContato.value;
         contatoJSON.telefone = telefoneContato.value;
@@ -24,12 +35,26 @@ const getDadosForm = function () {
         contatoJSON.image = imagemContato.value;
     }
 
-    return status, contatoJSON; 
+    return status && contatoJSON; 
 };
+
+document.getElementById('nome').addEventListener('input', function (event) {
+    const nomeValido = /^[a-zA-ZÀ-ÿ\s]*$/;
+    if (!nomeValido.test(event.target.value)) {
+        event.target.value = event.target.value.replace(/[^a-zA-ZÀ-ÿ\s]/g, '');
+    }
+});
+
+document.getElementById('telefone').addEventListener('input', function (event) {
+    const apenasNumeros = /^[0-9]*$/;
+    if (!apenasNumeros.test(event.target.value)) {
+        event.target.value = event.target.value.replace(/[^0-9]/g, '');
+    }
+});
 
 const postContato = async function (dadosContato) {
     let url = `https://app-avaliacao-brh0avd2ahegehac.brazilsouth-01.azurewebsites.net/projeto2/fecaf/novo/contato`;
-
+    
     let response = await fetch(url, {
         method: 'POST',
         mode: 'cors',
@@ -193,8 +218,6 @@ const limparFormulario = function () {
 
     document.getElementById('salvar').innerText = 'Salvar';
 };
-
-
 
 
 botaoSalvar.addEventListener('click', function () {
