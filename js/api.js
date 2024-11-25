@@ -1,6 +1,6 @@
 const botaoSalvar = document.getElementById('salvar');
 
-
+//Pega os dados do Formulario e os preprara para manipulação
 const getDadosForm = function () {
     let contatoJSON = {};
     let status = true;
@@ -38,6 +38,7 @@ const getDadosForm = function () {
     return status && contatoJSON; 
 };
 
+//Bloqueia a entrada de caracteres que nao sejam letras
 document.getElementById('nome').addEventListener('input', function (event) {
     const nomeValido = /^[a-zA-ZÀ-ÿ\s]*$/;
     if (!nomeValido.test(event.target.value)) {
@@ -45,6 +46,7 @@ document.getElementById('nome').addEventListener('input', function (event) {
     }
 });
 
+//Bloqueia a entrada de caracteres que nao sejam numeros
 document.getElementById('telefone').addEventListener('input', function (event) {
     const apenasNumeros = /^[0-9]*$/;
     if (!apenasNumeros.test(event.target.value)) {
@@ -52,6 +54,14 @@ document.getElementById('telefone').addEventListener('input', function (event) {
     }
 });
 
+//Limita a caixa em 11 numeros
+document.getElementById('telefone').addEventListener('input', function (event) {
+    if (event.target.value.length > 11) {
+        event.target.value = event.target.value.slice(0, 11);
+    }
+});
+
+//Função que adiociona um novo contato
 const postContato = async function (dadosContato) {
     let url = `https://app-avaliacao-brh0avd2ahegehac.brazilsouth-01.azurewebsites.net/projeto2/fecaf/novo/contato`;
     
@@ -71,6 +81,7 @@ const postContato = async function (dadosContato) {
     }
 };
 
+//Função que puxa os dados para edição
 const putContato = async function (dadosContato) {
     let id = sessionStorage.getItem('idContato');
     let url = `https://app-avaliacao-brh0avd2ahegehac.brazilsouth-01.azurewebsites.net/projeto2/fecaf/atualizar/contato/${id}`;
@@ -91,6 +102,7 @@ const putContato = async function (dadosContato) {
     }
 };
 
+//Função que deleta um contato da API
 const deleteContato = async function (id) {
     let url = `https://app-avaliacao-brh0avd2ahegehac.brazilsouth-01.azurewebsites.net/projeto2/fecaf/excluir/contato/${id}`;
 
@@ -106,6 +118,7 @@ const deleteContato = async function (id) {
     }
 };
 
+//Função que puxa os contatos da API
 const getContatos = async function () {
     let url = 'https://app-avaliacao-brh0avd2ahegehac.brazilsouth-01.azurewebsites.net/projeto2/fecaf/listar/contatos';
 
@@ -119,6 +132,7 @@ const getContatos = async function () {
     }
 };
 
+//Função que cria os cards com base nos dados da API
 const setCardItens = function (contatos) {
     let divListDados = document.getElementById('listDados');
     divListDados.innerHTML = '';
@@ -160,6 +174,7 @@ const setCardItens = function (contatos) {
 
         divListDados.appendChild(divDados);
 
+        //Botao que exclui um dado da API
         imgExcluir.addEventListener('click', function () {
             let id = imgExcluir.getAttribute('idContato');
             if (confirm('Deseja realmente excluir este contato?')) {
@@ -167,17 +182,23 @@ const setCardItens = function (contatos) {
             }
         });
 
+        //Botao que leva para a função de edição 
         imgEditar.addEventListener('click', function () {
             let id = imgEditar.getAttribute('idContato');
             console.log('ID do contato para editar:', id);
             getBuscarContato(id);
+        
+            const formulario = document.getElementById('adm');
+            formulario.scrollIntoView({ behavior: 'smooth' });
         });
+        
 
         
         
     });
 };
 
+//Função que busca o dado pelo ID na API
 const getBuscarContato = async function (id) {
     let url = `https://app-avaliacao-brh0avd2ahegehac.brazilsouth-01.azurewebsites.net/projeto2/fecaf/buscar/contato/${id}`;
     
@@ -189,8 +210,10 @@ const getBuscarContato = async function (id) {
             return;
         }
 
+        
         let dados = await response.json();
         console.log('Resposta completa da API:', dados);
+
 
         if (dados.contato && dados.contato.length > 0) {
             let contato = dados.contato[0];
@@ -210,6 +233,7 @@ const getBuscarContato = async function (id) {
     }
 };
 
+//Função que limpa as caixas do formulario depois que um dado é inserido ou modificado
 const limparFormulario = function () {
     document.getElementById('nome').value = '';
     document.getElementById('telefone').value = '';
@@ -219,7 +243,7 @@ const limparFormulario = function () {
     document.getElementById('salvar').innerText = 'Salvar';
 };
 
-
+//Botão que salva ou atualiza os dados da API
 botaoSalvar.addEventListener('click', function () {
     let dados = getDadosForm();
 
